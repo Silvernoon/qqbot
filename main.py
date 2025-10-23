@@ -33,7 +33,14 @@ def handle_webhook():
 
             match event_type:
                 case "GROUP_AT_MESSAGE_CREATE":
-                    qqapi.group_reply(d["group_openid"], event_type, d["id"])
+                    qqapi.group_reply(
+                        d["group_openid"],
+                        event_type,
+                        d["id"],
+                        openai.chat_with_model(
+                            openai.get_key(d["author"]["id"]), content
+                        ),
+                    )
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(d["author"]["id"], event_type, d["id"])
             return jsonify({}), 200

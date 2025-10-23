@@ -31,4 +31,5 @@ def chat_with_model(token: str, content: str):
         "messages": [{"role": "user", "content": content}],
     }
     response = requests.post(url, headers=headers, json=data)
-    return response.json()
+    print(response.json())
+    # return response.json()
