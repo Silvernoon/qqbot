@@ -18,7 +18,7 @@ def handle_webhook():
     timestamp = request.headers.get("X-Signature-Timestamp", "")
 
     if not qqapi.verify(signature, timestamp, request.get_data().decode()):
-        return 400
+        return jsonify({"error": "签名错误"}), 400
 
     body = request.json
     d = body.get("d")
@@ -36,7 +36,7 @@ def handle_webhook():
                     qqapi.group_reply(d["group_openid"], event_type, d["id"])
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(d["author"]["id"], event_type, d["id"])
-            return 200
+            return jsonify({}), 200
         case 13:
             outsign = qqapi.sign(d["event_ts"] + d["plain_token"])
 
