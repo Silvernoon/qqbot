@@ -8,6 +8,7 @@ import qqapi
 import openai
 
 app = Flask(__name__)
+openai.load()
 
 
 @app.route("/webhook", methods=["POST"])
@@ -35,7 +36,7 @@ def handle_webhook():
                     qqapi.group_reply(d["group_openid"], event_type, d["id"])
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(d["author"]["id"], event_type, d["id"])
-            return jsonify({}), 200
+            return 200
         case 13:
             outsign = qqapi.sign(d["event_ts"] + d["plain_token"])
 

@@ -1,7 +1,29 @@
+from typing import Dict, TypedDict
 import requests
+import os
 
 
-def chat_with_model(token, content: str):
+class user(TypedDict):
+    qq_userid: str
+    api_key: str
+
+
+keys: Dict[str, user] = dict()
+
+
+def load():
+    global keys
+    with open("filename.txt", "r", encoding="utf-8") as file:
+        for line in file:
+            datas = line.split(" ")
+            keys[datas[0]] = {"qq_userid": datas[0], "api_key": datas[1]}
+
+
+def get_key(id: str) -> str:
+    return keys[id]["api_key"]
+
+
+def chat_with_model(token: str, content: str):
     url = "http://localhost:8070/api/chat/completions"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     data = {
