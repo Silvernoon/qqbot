@@ -13,7 +13,7 @@ keys: Dict[str, user] = dict()
 
 def load():
     global keys
-    with open("filename.txt", "r", encoding="utf-8") as file:
+    with open("keys", "r", encoding="utf-8") as file:
         for line in file:
             datas = line.split(" ")
             keys[datas[0]] = {"qq_userid": datas[0], "api_key": datas[1]}
