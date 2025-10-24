@@ -30,6 +30,7 @@ HEADER = {
     "Authorization": f"Bearer {KEY}",
     "Content-Type": "application/json",
 }
+ENDPOINT = os.environ["AI_ENDPOINT"]
 
 
 class ContextChat:
@@ -38,7 +39,7 @@ class ContextChat:
             f"{BASE_URL}/context/create",
             headers=HEADER,
             json={
-                "model": "deepseek-v3-1-terminus",
+                "model": ENDPOINT,
                 "caching": {"type": "enabled"},
                 "thinking": {"type": "disabled"},
                 "messages": [
@@ -60,7 +61,7 @@ class ContextChat:
             headers=HEADER,
             json={
                 "context_id": self.context_id,
-                "model": "deepseek-v3-1-terminus",
+                "model": ENDPOINT,
                 "messages": [{"role": "user", "content": content}],
             },
         ).json()["choices"][0]["message"]["content"]
