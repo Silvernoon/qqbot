@@ -61,24 +61,28 @@ def verify(signature: str, timestamp: str, data: str) -> bool:
 
 
 def users_dm_reply(openid, event_id, msg_id, content="何意味"):
-    url = f"{BASE_URL}/v2/users/{openid}/messages"
-    data = {
-        "content": content,
-        "msg_type": 0,
-        "event_id": event_id,
-        "msg_id": msg_id,
-    }
-    response = requests.post(url, headers=get_auth_headers(), json=data)
+    response = requests.post(
+        f"{BASE_URL}/v2/users/{openid}/messages",
+        headers=get_auth_headers(),
+        json={
+            "content": content,
+            "msg_type": 0,
+            "event_id": event_id,
+            "msg_id": msg_id,
+        },
+    )
     return response.json()
 
 
 def group_reply(group_openid, event_id, msg_id, content="何意味"):
-    url = f"{BASE_URL}/v2/groups/{group_openid}/messages"
-    data = {
-        "content": content,
-        "msg_type": 0,
-        "event_id": event_id,
-        "msg_id": msg_id,
-    }
-    response = requests.post(url, headers=get_auth_headers(), json=data)
-    return response.json()
+    response = requests.post(
+        f"{BASE_URL}/v2/groups/{group_openid}/messages",
+        headers=get_auth_headers(),
+        json={
+            "content": content,
+            "msg_type": 0,
+            "event_id": event_id,
+            "msg_id": msg_id,
+        },
+    )
+    return response.json()["choices"][0]["message"]["content"]

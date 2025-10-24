@@ -1,0 +1,42 @@
+{
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_VERBOSE_MAKEFILE": true
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "linux-release-clang",
+      "displayName": "Linux x64",
+      "binaryDir": "${sourceDir}/build/linux-release-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_INCLUDE_PATH": "${sourceDir}/lib/linux/include",
+        "CMAKE_LIBRARY_PATH": "${sourceDir}/lib/linux"
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows-release"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-release-clang",
+      "configurePreset": "linux-release-clang",
+      "configuration": "RelWithDebInfo",
+      "jobs": 4
+    }
+  ]
+}

@@ -1,14 +1,23 @@
 #!/usr/bin/python3
 
 from flask import Flask, request, jsonify
-import os
-import time
-import requests
+import sys
+import logging
 import qqapi
 import openai
 
 app = Flask(__name__)
 openai.load()
+
+last_msg_id = ""
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+chat = openai.Chat()
 
 
 @app.route("/webhook", methods=["POST"])
@@ -27,26 +36,35 @@ def handle_webhook():
         case 0:
             # print(body)
             content = d.get("content")
+            if content is not str:
+                print("无效内容")
+                return jsonify({"error": "无效内容"}), 400
+
             # print(f"收到消息：{content}")
 
             event_type = body["t"]
+            author_id = d["author"]["id"]
+            msg_id = d["id"]
+
+            global last_msg_id
+            if last_msg_id == msg_id:
+                return jsonify({"error": "重复对话"}), 400
+            else:
+                last_msg_id = msg_id
 
             match event_type:
                 case "GROUP_AT_MESSAGE_CREATE":
                     qqapi.group_reply(
                         d["group_openid"],
                         event_type,
-                        d["id"],
-                        openai.chat_with_model(
-                            openai.get_key(d["author"]["id"]), content
-                        ),
+                        msg_id,
+                        chat.chat_with_cache(content),
                     )
                 case "C2C_MESSAGE_CREATE":
-                    qqapi.users_dm_reply(d["author"]["id"], event_type, d["id"])
+                    qqapi.users_dm_reply(author_id, event_type, msg_id)
             return jsonify({}), 200
         case 13:
             outsign = qqapi.sign(d["event_ts"] + d["plain_token"])
-
             return jsonify(
                 {"plain_token": d["plain_token"], "signature": outsign.hex()}
             ), 200
