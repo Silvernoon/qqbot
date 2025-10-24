@@ -5,11 +5,13 @@ import sys
 import logging
 import qqapi
 import openai
+from collections import deque
+
 
 app = Flask(__name__)
 openai.load()
 
-last_msg_id = ""
+last_msg_ids = deque[str](maxlen=20)
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -17,7 +19,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-chat = openai.Chat()
+chat = openai.ContextChat()
 
 
 @app.route("/webhook", methods=["POST"])
@@ -46,11 +48,12 @@ def handle_webhook():
             author_id = d["author"]["id"]
             msg_id = d["id"]
 
-            global last_msg_id
-            if last_msg_id == msg_id:
+            global last_msg_ids
+            if msg_id in last_msg_ids:
+                print("重复对话")
                 return jsonify({"error": "重复对话"}), 400
             else:
-                last_msg_id = msg_id
+                last_msg_ids.append(msg_id)
 
             match event_type:
                 case "GROUP_AT_MESSAGE_CREATE":
@@ -58,7 +61,7 @@ def handle_webhook():
                         d["group_openid"],
                         event_type,
                         msg_id,
-                        chat.chat_with_cache(content),
+                        chat.chat(content),
                     )
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(author_id, event_type, msg_id)

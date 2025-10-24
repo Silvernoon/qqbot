@@ -85,4 +85,4 @@ def group_reply(group_openid, event_id, msg_id, content="何意味"):
             "msg_id": msg_id,
         },
     )
-    return response.json()["choices"][0]["message"]["content"]
+    return response.json()
