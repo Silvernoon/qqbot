@@ -1,5 +1,6 @@
 from typing import Dict, TypedDict
 import requests
+import time
 import os
 
 KEY = os.environ["API_KEY"]
@@ -23,17 +24,19 @@ def load():
 # -----------------------------------------
 class Chat:
     def __init__(self) -> None:
-        self.previous_response_id: str
+        self.previous_response_id: str = ""
         self.data = {
             "model": "deepseek-v3-1-terminus",
             "caching": {"type": "enabled"},
             "thinking": {"type": "disabled"},
+            "expire_at": int(time.time()) + 3600,
         }
 
     def chat_with_cache(self, content: str) -> str:
-        if self.previous_response_id:
+        if self.previous_response_id != "":
             self.data["previous_response_id"] = self.previous_response_id
-            self.data["input"] = content
+
+        self.data["input"] = content
 
         response = requests.post(
             "https://ark.cn-beijing.volces.com/api/v3/responses",
