@@ -9,7 +9,7 @@ from collections import deque
 
 
 app = Flask(__name__)
-openai.load()
+# openai.load()
 
 last_msg_ids = deque[str](maxlen=20)
 
