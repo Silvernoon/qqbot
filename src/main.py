@@ -36,7 +36,7 @@ def handle_webhook():
         case 0:
             # print(body)
             content = d.get("content")
-            if content is not str:
+            if type(content) is not str:
                 print("无效内容")
                 return jsonify({"error": "无效内容"}), 400
 
