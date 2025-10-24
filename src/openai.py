@@ -84,10 +84,12 @@ class ResponseChat:
         }
 
         self.chat_with_cache(
-            {
-                "role": "system",
-                "content": PROMPT,
-            }
+            [
+                {
+                    "role": "system",
+                    "content": PROMPT,
+                }
+            ]
         )
 
     def chat_with_cache(self, content) -> str:
