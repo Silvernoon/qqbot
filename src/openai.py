@@ -51,8 +51,7 @@ class ContextChat:
                 "ttl": 3600,
                 "mode": "session",
                 "truncation_strategy": {
-                    "type": "rolling_tokens",
-                    "rolling_tokens": "true",
+                    "type": "only_second",
                 },
             },
         )
