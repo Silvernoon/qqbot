@@ -32,6 +32,8 @@ HEADER = {
 }
 ENDPOINT = os.environ["AI_ENDPOINT"]
 
+PROMPT = "你是qq群的聊天ai，你的回复要简短，输出格式不要带markdown"
+
 
 class ContextChat:
     def __init__(self) -> None:
@@ -45,7 +47,7 @@ class ContextChat:
                 "messages": [
                     {
                         "role": "system",
-                        "content": "你是qq群的聊天ai，你的回复要简短，输出格式不要带markdown",
+                        "content": PROMPT,
                     }
                 ],
                 "ttl": 3600,
@@ -81,8 +83,15 @@ class ResponseChat:
             "expire_at": int(time.time()) + 3600,
         }
 
-    def chat_with_cache(self, content: str) -> str:
-        if self.previous_response_id != "" and self.last_timestamp < time.time():
+        self.chat_with_cache(
+            {
+                "role": "system",
+                "content": PROMPT,
+            }
+        )
+
+    def chat_with_cache(self, content) -> str:
+        if self.previous_response_id != "" and self.last_timestamp > time.time():
             self.data["previous_response_id"] = self.previous_response_id
 
         self.data["input"] = content

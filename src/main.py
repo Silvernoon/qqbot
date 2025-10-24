@@ -19,7 +19,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-chat = openai.ContextChat()
+chat = openai.ResponseChat()
 
 
 @app.route("/webhook", methods=["POST"])
@@ -61,7 +61,7 @@ def handle_webhook():
                         d["group_openid"],
                         event_type,
                         msg_id,
-                        chat.chat(content),
+                        chat.chat_with_cache(content),
                     )
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(author_id, event_type, msg_id)
