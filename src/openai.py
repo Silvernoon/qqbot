@@ -97,10 +97,11 @@ class ResponseChat:
         )
 
     def chat_with_cache(self, content, userid="") -> str:
-        if self.last_timestamp > time.time():
-            self.data["previous_response_id"] = self.previous_response_id
-        else:
-            self.__init__()
+        if self.previous_response_id:
+            if self.last_timestamp > time.time():
+                self.data["previous_response_id"] = self.previous_response_id
+            else:
+                self.__init__()
 
         global users
         if userid:
