@@ -32,7 +32,11 @@ HEADER = {
 }
 ENDPOINT = os.environ["AI_ENDPOINT"]
 
-PROMPT = "你是qq群的聊天ai，你的回复要简短，输出格式不要带markdown"
+PROMPT = """
+你是qq群的聊天ai，你的回复要简短，输出格式不要带markdown. 
+你会收到多名User的消息，消息头部带有User的id。有时id后面会附带括号，括号内是User的昵称，在必要情况使用昵称称呼User。
+如："ABCDEFGHIGKLMNOPQRSTUVWXYZABCDEF(Alice):你好"
+"""
 
 
 class ContextChat:
@@ -77,7 +81,7 @@ class ResponseChat:
         self.previous_response_id: str = ""
         self.last_timestamp = 0
         self.data = {
-            "model": "deepseek-v3-1-terminus",
+            "model": ENDPOINT,
             "caching": {"type": "enabled"},
             "thinking": {"type": "disabled"},
             "expire_at": int(time.time()) + 3600,
@@ -92,19 +96,28 @@ class ResponseChat:
             ]
         )
 
-    def chat_with_cache(self, content) -> str:
-        if self.previous_response_id != "" and self.last_timestamp > time.time():
+    def chat_with_cache(self, content, userid="") -> str:
+        if self.last_timestamp > time.time():
             self.data["previous_response_id"] = self.previous_response_id
+        else:
+            self.__init__()
 
-        self.data["input"] = content
+        global users
+        if userid:
+            userid += users[userid].get("name")
+            self.data["input"] = userid + content
+        else:
+            self.data["input"] = content
 
         response = requests.post(
             f"{BASE_URL}/responses",
             headers=HEADER,
             json=self.data,
-        ).json()
+        )
+        response = response.json()
+        print(response)
 
-        self.previous_response_id = response["id"]
+        self.previous_response_id = response.get("id")
         self.last_timestamp = response["expire_at"]
 
         return response["output"][0]["content"][0]["text"]
