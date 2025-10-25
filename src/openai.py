@@ -85,7 +85,6 @@ class ResponseChat:
             "model": ENDPOINT,
             "caching": {"type": "enabled"},
             "thinking": {"type": "disabled"},
-            "expire_at": int(time.time()) + 3600,
         }
 
         self.chat_with_cache(
@@ -111,6 +110,8 @@ class ResponseChat:
             self.data["input"] = userid + ":" + content
         else:
             self.data["input"] = content
+
+        self.data["expire_at"] = int(time.time()) + 3600
 
         response = requests.post(
             f"{BASE_URL}/responses",
