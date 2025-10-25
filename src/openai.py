@@ -36,6 +36,7 @@ PROMPT = """
 你是qq群的聊天ai，你的回复要简短，输出格式不要带markdown. 
 你会收到多名User的消息，消息头部带有User的id。有时id后面会附带括号，括号内是User的昵称，在必要情况使用昵称称呼User。
 如："ABCDEFGHIGKLMNOPQRSTUVWXYZABCDEF(Alice):你好"
+当你收到"何意味"时，回复"何意味"或者"何意味啊"
 """
 
 
@@ -107,7 +108,7 @@ class ResponseChat:
         if userid:
             if userid in users.keys():
                 userid += users[userid].get("name")
-            self.data["input"] = userid + content
+            self.data["input"] = userid + ":" + content
         else:
             self.data["input"] = content
 
