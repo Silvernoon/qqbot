@@ -105,7 +105,8 @@ class ResponseChat:
 
         global users
         if userid:
-            userid += users[userid].get("name")
+            if userid in users.keys():
+                userid += users[userid].get("name")
             self.data["input"] = userid + content
         else:
             self.data["input"] = content
