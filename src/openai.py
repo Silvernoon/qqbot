@@ -79,56 +79,58 @@ class ContextChat:
 
 class ResponseChat:
     def __init__(self) -> None:
-        self.data = {
-            "model": ENDPOINT,
-            "caching": {"type": "enabled"},
-            "thinking": {"type": "disabled"},
-        }
         self.reset()
 
     def reset(self):
-        self.previous_response_id: str = ""
-        self.last_timestamp = 0
-        self.data["input"] = [
+        msg = [
             {
                 "role": "system",
                 "content": PROMPT,
             }
         ]
+        self.chat_response(msg)
 
+        # debug
         print("reset")
 
     def try_chat_with_cache(self, content, userid) -> str:
+        data = {}
         if self.previous_response_id:
             if self.last_timestamp > time.time():
-                self.data["previous_response_id"] = self.previous_response_id
+                data["previous_response_id"] = self.previous_response_id
             else:
                 self.reset()
 
-        return self.chat_with_cache(content, userid)
-
-    def chat_with_cache(self, content, userid) -> str:
         global users
         if userid in users.keys():
             userid += users[userid].get("name")
+        content = userid + ":" + content
 
-        self.data["input"] = userid + ":" + content
+        # debug
+        print(content)
 
-        self.data["expire_at"] = int(time.time()) + 3600
+        rep = self.chat_response(content, data)
 
-        response = requests.post(
+        return rep["output"][0]["content"][0]["text"]
+
+    def chat_response(self, input, data: dict = {}, ttl: int = 3600):
+        rep = requests.post(
             f"{BASE_URL}/responses",
             headers=HEADER,
-            json=self.data,
-        )
-        response = response.json()
+            json={
+                "model": ENDPOINT,
+                "caching": {"type": "enabled"},
+                "thinking": {"type": "disabled"},
+                "input": input,
+                "expire_at": int(time.time()) + ttl,
+                **data,
+            },
+        ).json()
 
-        print(response)
+        self.previous_response_id = rep.get("id")
+        self.last_timestamp = rep["expire_at"]
 
-        self.previous_response_id = response.get("id")
-        self.last_timestamp = response["expire_at"]
-
-        return response["output"][0]["content"][0]["text"]
+        return rep
 
     def delete_cache(self, response_id=None):
         if response_id is None:
