@@ -24,6 +24,8 @@ chat = openai.ResponseChat()
 
 @app.route("/webhook", methods=["POST"])
 def handle_webhook():
+    global chat
+
     # 验证签名
     signature = request.headers.get("X-Signature-Ed25519", "")
     timestamp = request.headers.get("X-Signature-Timestamp", "")
@@ -61,7 +63,7 @@ def handle_webhook():
                         d["group_openid"],
                         event_type,
                         msg_id,
-                        chat.chat_with_cache(content, author_id),
+                        chat.try_chat_with_cache(content, author_id),
                     )
                 case "C2C_MESSAGE_CREATE":
                     qqapi.users_dm_reply(author_id, event_type, msg_id)
