@@ -127,6 +127,8 @@ class ResponseChat:
             },
         ).json()
 
+        print(rep)
+
         self.previous_response_id = rep.get("id")
         self.last_timestamp = rep["expire_at"]
 
