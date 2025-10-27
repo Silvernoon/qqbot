@@ -79,7 +79,7 @@ class ContextChat:
 
 class ResponseChat:
     def __init__(self) -> None:
-        self.previous_response_id: str
+        self.previous_response_id: str = ""
         self.last_timestamp = 0
 
     def try_chat_with_cache(self, content, userid) -> str:
