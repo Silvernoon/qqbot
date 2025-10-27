@@ -79,41 +79,34 @@ class ContextChat:
 
 class ResponseChat:
     def __init__(self) -> None:
-        self.reset()
-
-    def reset(self):
-        msg = [
-            {
-                "role": "system",
-                "content": PROMPT,
-            }
-        ]
-        self.chat_response(msg)
-
-        # debug
-        print("reset")
+        self.previous_response_id: str
+        self.last_timestamp = 0
 
     def try_chat_with_cache(self, content, userid) -> str:
-        data = {}
-        if self.previous_response_id:
-            if self.last_timestamp > time.time():
-                data["previous_response_id"] = self.previous_response_id
-            else:
-                self.reset()
+        if self.previous_response_id and self.last_timestamp > time.time():
+            global users
+            if userid in users.keys():
+                userid += users[userid].get("name")
+            content = userid + ":" + content
 
-        global users
-        if userid in users.keys():
-            userid += users[userid].get("name")
-        content = userid + ":" + content
+            return self.chat_response(
+                content, {"previous_response_id": self.previous_response_id}
+            )
 
-        # debug
-        print(content)
+        return self.chat_response(
+            [
+                {
+                    "role": "system",
+                    "content": PROMPT,
+                },
+                {
+                    "role": "user",
+                    "content": content,
+                },
+            ]
+        )
 
-        rep = self.chat_response(content, data)
-
-        return rep["output"][0]["content"][0]["text"]
-
-    def chat_response(self, input, data: dict = {}, ttl: int = 3600):
+    def chat_response(self, input, data: dict = {}, ttl: int = 3600) -> str:
         rep = requests.post(
             f"{BASE_URL}/responses",
             headers=HEADER,
@@ -132,7 +125,7 @@ class ResponseChat:
         self.previous_response_id = rep.get("id")
         self.last_timestamp = rep["expire_at"]
 
-        return rep
+        return rep["output"][0]["content"][0]["text"]
 
     def delete_cache(self, response_id=None):
         if response_id is None:
