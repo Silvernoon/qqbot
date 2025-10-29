@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from typing import Dict
 from flask import Flask, request, jsonify
 import sys
 import logging
@@ -19,13 +20,11 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-chat = openai.ResponseChat()
+chats: Dict[str, openai.ResponseChat] = {}
 
 
 @app.route("/webhook", methods=["POST"])
 def handle_webhook():
-    global chat
-
     # 验证签名
     signature = request.headers.get("X-Signature-Ed25519", "")
     timestamp = request.headers.get("X-Signature-Timestamp", "")
@@ -57,16 +56,30 @@ def handle_webhook():
             else:
                 last_msg_ids.append(msg_id)
 
+            global chats
+
             match event_type:
                 case "GROUP_AT_MESSAGE_CREATE":
+                    group_id = d["group_openid"]
+                    if not chats.get(group_id):
+                        chats[group_id] = openai.ResponseChat()
+
                     qqapi.group_reply(
-                        d["group_openid"],
+                        group_id,
                         event_type,
                         msg_id,
-                        chat.try_chat_with_cache(content, author_id),
+                        chats[group_id].try_chat_with_cache(content, author_id),
                     )
                 case "C2C_MESSAGE_CREATE":
-                    qqapi.users_dm_reply(author_id, event_type, msg_id)
+                    if not chats.get(author_id):
+                        chats[author_id] = openai.ResponseChat()
+
+                    qqapi.users_dm_reply(
+                        author_id,
+                        event_type,
+                        msg_id,
+                        chats[author_id].try_chat_with_cache(content, author_id),
+                    )
             return jsonify({}), 200
         case 13:
             outsign = qqapi.sign(d["event_ts"] + d["plain_token"])
