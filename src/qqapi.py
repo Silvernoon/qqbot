@@ -71,7 +71,7 @@ def users_dm_reply(openid, event_id, msg_id, content="何意味"):
             "msg_id": msg_id,
         },
     )
-    return response.json()
+    return response
 
 
 def group_reply(group_openid, event_id, msg_id, content="何意味"):
@@ -85,4 +85,4 @@ def group_reply(group_openid, event_id, msg_id, content="何意味"):
             "msg_id": msg_id,
         },
     )
-    return response.json()
+    return response
