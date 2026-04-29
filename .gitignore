@@ -1,5 +1,2 @@
-compile_commands.json
-build/
-.cache/
-*.so
 __pycache__/
+venv/
